@@ -1,0 +1,161 @@
+//Arrays
+var a=[1,"2",[3]];
+a.length;  //3
+a[0]===1;  // true
+a[2][0]===3; //true
+
+
+var a = [ ];
+
+a.length;	// 0
+
+a[0] = 1;
+a[1] = "2";
+a[2] = [ 3 ];
+
+a.length;	// 3
+
+
+
+//e careful about creating "sparse" arrays 
+var a = [ ];
+
+a[0] = 1;
+// no `a[1]` slot set here
+a[2] = [ 3 ];
+
+a[1];		// undefined
+
+a.length;	// 3
+//[1, empty, Array(1)]
+
+//Array-Likes
+
+function foo(){
+var arr=Array.prototype.slice. call(arguments);
+arr.push("mitul");
+console.log(arr)
+}
+foo("Vaibhav","Vijay");
+
+
+//String
+
+//JavaScript strings are immutable, while arrays are quite mutable.
+//many of the array methods that could be helpful when dealing with strings are not actually
+// available for them, but we can "borrow" non-mutation array methods against our string:
+
+a.length;  // 3
+b.length;     // 3
+
+a.indexOf( "o" ); // 1
+b.indexOf( "o" ); // 1
+
+var c = a.concat( "bar" );			// "foobar"
+var d = b.concat( ["b","a","r"] );	// ["f","o","o","b","a","r"]
+
+a === c; // false
+b === d; // false
+
+a;  // "foo"
+b   // ["f","o","o"]
+
+var c = Array.prototype.join.call( a, "-" );
+var d = Array.prototype.map.call( a, function(v){
+	return v.toUpperCase() + ".";
+} ).join( "" );
+
+c;				// "f-o-o"
+d;				// "F.O.O."
+b.reverse();	// ["!","o","O","f"]
+Array.prototype.reverse.call( a );
+//Unfortunately, this "borrowing" doesn't work with array mutators, because strings are immutable and thus can't be modified in place:
+// still returns a String object wrapper (see Chapter 3)
+// for "foo" :(
+
+
+
+
+//Special Values
+
+Undefined
+
+//In non-strict mode, it's actually possible (though incredibly ill-advised!) to assign a value to the globally provided undefined identifier:
+function foo() {
+	undefined = 2; // really bad idea!
+}
+
+foo();
+
+function foo() {
+	"use strict";
+	undefined = 2; // TypeError!
+}
+
+foo();
+
+//void Operator
+//The expression void ___ "voids" out any value, so that the result of the expression is always the undefined value.
+var a = 42;
+
+console.log( void a, a ); // undefined 42
+
+//Value vs. Reference
+var a = 2;
+var b = a; // `b` is always a copy of the value in `a`
+b++;
+a; // 2
+b; // 3
+
+var c = [1,2,3];
+var d = c; // `d` is a reference to the shared `[1,2,3]` value
+d.push( 4 );
+c; // [1,2,3,4]
+d; // [1,2,3,4]
+
+//Simple values (aka scalar primitives) are always assigned/passed by value-copy: null, undefined, string, number, boolean, and ES6's symbol.
+//Compound values -- objects (including arrays, and all boxed object wrappers -- ) and functions -- always create a copy of the reference on assignment or passing.
+//In the above snippet, because 2 is a scalar primitive, a holds one initial copy of that value, and b is assigned another copy of the value. When changing b, you are in no way changing the value in a.
+//but both c and d are separate references to the same shared value [1,2,3], which is a compound value
+
+
+
+
+//The most common way such confusion happens is with function parameters:
+
+function foo(x) {
+	x.push( 4 );
+	x; // [1,2,3,4]
+
+	// later
+	x = [4,5,6];
+	x.push( 7 );
+	x; // [4,5,6,7]
+}
+
+var a = [1,2,3];
+
+foo( a );
+
+a; // [1,2,3,4]  not  [4,5,6,7]
+
+
+
+//another example
+function foo(x) {
+	x.push( 4 );
+	x; // [1,2,3,4]
+
+	// later
+	x.length = 0; // empty existing array in-place
+	x.push( 4, 5, 6, 7 );
+	x; // [4,5,6,7]
+}
+
+var a = [1,2,3];
+
+foo( a );
+
+a; // [4,5,6,7]  not  [1,2,3,4]
+//As you can see, x.length = 0 and x.push(4,5,6,7) were not creating a new array, but modifying the existing shared array. So of course, a references the new [4,5,6,7] contents.
+
